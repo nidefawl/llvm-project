@@ -1212,7 +1212,7 @@ void request_evaluate(const llvm::json::Object &request) {
   const auto expression = GetString(arguments, "expression");
   llvm::StringRef context = GetString(arguments, "context");
 
-  if (!expression.empty() && expression[0] == '`') {
+  if (!expression.empty() && (expression[0] == '`' || expression[0] == '/')) {
     auto result =
         RunLLDBCommands(llvm::StringRef(), {std::string(expression.substr(1))});
     EmplaceSafeString(body, "result", result);
