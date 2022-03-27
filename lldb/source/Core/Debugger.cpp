@@ -1775,9 +1775,13 @@ void Debugger::HandleProcessEvent(const EventSP &event_sp) {
                                               pop_process_io_handler);
     }
 
+// Currently not implemented on windows.
+// Exclude calls for performance reasons.
+#if !defined(_WIN32)
     // Now display STDOUT and STDERR
     FlushProcessOutput(*process_sp, got_stdout || got_state_changed,
                        got_stderr || got_state_changed);
+#endif
 
     // Give structured data events an opportunity to display.
     if (got_structured_data) {
