@@ -123,18 +123,21 @@ ProcessWindows::ProcessWindows(lldb::TargetSP target_sp,
 ProcessWindows::~ProcessWindows() {}
 
 size_t ProcessWindows::GetSTDOUT(char *buf, size_t buf_size, Status &error) {
-  error.SetErrorString("GetSTDOUT unsupported on Windows");
+  // Don't set error for performance reasons.
+  // error.SetErrorString("GetSTDOUT unsupported on Windows");
   return 0;
 }
 
 size_t ProcessWindows::GetSTDERR(char *buf, size_t buf_size, Status &error) {
-  error.SetErrorString("GetSTDERR unsupported on Windows");
+  // Don't set error for performance reasons.
+  // error.SetErrorString("GetSTDERR unsupported on Windows");
   return 0;
 }
 
 size_t ProcessWindows::PutSTDIN(const char *buf, size_t buf_size,
                                 Status &error) {
-  error.SetErrorString("PutSTDIN unsupported on Windows");
+  // Don't set error for performance reasons.
+  // error.SetErrorString("PutSTDIN unsupported on Windows");
   return 0;
 }
 
