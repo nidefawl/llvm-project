@@ -21,7 +21,9 @@
 #include "llvm/Support/Process.h"
 #include "llvm/Support/Program.h"
 #include "llvm/Support/SmallVectorMemoryBuffer.h"
+#include "llvm/Support/raw_ostream.h"
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <new>
 #include <sys/types.h>
@@ -247,15 +249,22 @@ static ErrorOr<std::unique_ptr<MB>>
 getOpenFileImpl(sys::fs::file_t FD, const Twine &Filename, uint64_t FileSize,
                 uint64_t MapSize, int64_t Offset, bool RequiresNullTerminator,
                 bool IsVolatile);
-
+namespace llvm {
+extern bool DebugErrorCrap;
+}
 template <typename MB>
 static ErrorOr<std::unique_ptr<MB>>
 getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
            bool IsText, bool RequiresNullTerminator, bool IsVolatile) {
   Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
       Filename, IsText ? sys::fs::OF_TextWithCRLF : sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+  if (!FDOrErr) {
+    auto Error = errorToErrorCode(FDOrErr.takeError());
+    if (DebugErrorCrap) {
+      llvm::outs() << "Error is " << Error.value() << " - " << Error.category().name() << "  " << (uint64_t)&(Error.category()) << "\n";
+    }
+    return Error;
+  }
   sys::fs::file_t FD = *FDOrErr;
   auto Ret = getOpenFileImpl<MB>(FD, Filename, /*FileSize=*/-1, MapSize, Offset,
                                  RequiresNullTerminator, IsVolatile);

@@ -18,6 +18,7 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/ConvertUTF.h"
 #include "llvm/Support/WindowsError.h"
+#include <cstdint>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -59,6 +60,7 @@ static bool is_separator(const wchar_t value) {
 }
 
 namespace llvm {
+extern bool DebugErrorCrap;
 namespace sys  {
 namespace windows {
 
@@ -1189,8 +1191,12 @@ Expected<file_t> openNativeFile(const Twine &Name, CreationDisposition Disp,
   file_t Result;
   std::error_code EC = openNativeFileInternal(
       Name, Result, NativeDisp, NativeAccess, FILE_ATTRIBUTE_NORMAL, Inherit);
-  if (EC)
+  if (EC) {
+
+    if (DebugErrorCrap)
+      llvm::outs() << "EC " << EC.value() << " - " << EC.category().name() << " - " <<(unsigned long long)(&EC.category()) << "\n";
     return errorCodeToError(EC);
+  }
 
   if (Flags & OF_UpdateAtime) {
     FILETIME FileTime;

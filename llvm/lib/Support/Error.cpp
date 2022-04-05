@@ -10,6 +10,7 @@
 #include "llvm/ADT/Twine.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/ManagedStatic.h"
+#include "llvm/Support/raw_ostream.h"
 #include <system_error>
 
 using namespace llvm;
@@ -17,7 +18,7 @@ using namespace llvm;
 namespace {
 
   enum class ErrorErrorCode : int {
-    MultipleErrors = 1,
+    MultipleErrors = 50000,
     FileError,
     InconvertibleError
   };
@@ -68,8 +69,11 @@ void logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
   });
 }
 
+bool DebugErrorCrap = false;
 
 std::error_code ErrorList::convertToErrorCode() const {
+  if (DebugErrorCrap)
+  llvm::outs() << "Convert ErrorList\n";
   return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
                          *ErrorErrorCat);
 }
@@ -80,6 +84,8 @@ std::error_code inconvertibleErrorCode() {
 }
 
 std::error_code FileError::convertToErrorCode() const {
+  if (DebugErrorCrap)
+  llvm::outs() << "Convert FileError\n";
   std::error_code NestedEC = Err->convertToErrorCode();
   if (NestedEC == inconvertibleErrorCode())
     return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
@@ -96,6 +102,16 @@ Error errorCodeToError(std::error_code EC) {
 std::error_code errorToErrorCode(Error Err) {
   std::error_code EC;
   handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
+    if (DebugErrorCrap) {
+      
+    llvm::outs() << "handleAllErrors ";
+    llvm::outs() << EI.message();
+    llvm::outs() << " ";
+    llvm::outs() << EI.dynamicClassID();
+    llvm::outs() << " ";
+    llvm::outs() << EI.classID();
+    llvm::outs() << "\n ";
+    }
     EC = EI.convertToErrorCode();
   });
   if (EC == inconvertibleErrorCode())
@@ -133,6 +149,8 @@ void StringError::log(raw_ostream &OS) const {
 }
 
 std::error_code StringError::convertToErrorCode() const {
+  if (DebugErrorCrap)
+  llvm::outs() << "Convert StringError\n";
   return EC;
 }
 

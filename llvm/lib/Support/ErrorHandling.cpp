@@ -238,8 +238,12 @@ void LLVMResetFatalErrorHandler() {
 #define MAP_ERR_TO_COND(x, y)                                                  \
   case x:                                                                      \
     return make_error_code(errc::y)
+namespace llvm {
+  
+extern bool DebugErrorCrap;
+}
 
-std::error_code llvm::mapWindowsError(unsigned EV) {
+std::error_code mapWindowsError__(unsigned EV) {
   switch (EV) {
     MAP_ERR_TO_COND(ERROR_ACCESS_DENIED, permission_denied);
     MAP_ERR_TO_COND(ERROR_ALREADY_EXISTS, file_exists);
@@ -298,6 +302,23 @@ std::error_code llvm::mapWindowsError(unsigned EV) {
   default:
     return std::error_code(EV, std::system_category());
   }
+}
+std::error_code llvm::mapWindowsError(unsigned EV) {
+  auto EC = mapWindowsError__(EV);
+  
+  if (DebugErrorCrap) {
+
+    llvm::outs() << "EC " << EC.value() << " - " << EC.category().name()
+                 << " - " << (unsigned long long)(&EC.category()) << "\n";
+    auto test = std::error_code(2, std::generic_category());
+    llvm::outs() << "cat 3 addr "
+                 << std::to_string((unsigned long long)&test.category())
+                 << "\n";
+    llvm::outs() << "std::generic_category() addr "
+                 << std::to_string((unsigned long long)&std::generic_category())
+                 << "\n";
+  }
+  return EC;
 }
 
 #endif

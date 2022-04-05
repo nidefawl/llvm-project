@@ -35,6 +35,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Process.h"
+#include "llvm/Support/ScopedPrinter.h"
 #include "llvm/Support/StringSaver.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/ToolOutputFile.h"
@@ -1002,15 +1003,48 @@ static void performOperation(ArchiveOperation Operation,
   }
   llvm_unreachable("Unknown operation.");
 }
-
+static void aTest() {
+  std::error_code EC{};
+  bool equals{};
+  equals = EC == errc::no_such_file_or_directory;
+}
+namespace llvm {
+extern bool DebugErrorCrap;
+}
 static int performOperation(ArchiveOperation Operation,
                             std::vector<NewArchiveMember> *NewMembers) {
+  // DebugErrorCrap = true;
   // Create or open the archive object.
   ErrorOr<std::unique_ptr<MemoryBuffer>> Buf = MemoryBuffer::getFile(
       ArchiveName, /*IsText=*/false, /*RequiresNullTerminator=*/false);
   std::error_code EC = Buf.getError();
-  if (EC && EC != errc::no_such_file_or_directory)
-    fail("unable to open '" + ArchiveName + "': " + EC.message());
+  if (EC && !(EC == errc::no_such_file_or_directory)) {
+    // std::error_code errCToEC = errc::no_such_file_or_directory;
+    // auto test= std::error_code(2, std::generic_category());
+    // bool implicitEqualsCode = EC.value() == errCToEC.value();
+    // bool implicitEqualsCat = EC.category() == errCToEC.category();
+    // bool implicitEquals = EC == errCToEC;
+    // auto addr1 = reinterpret_cast<size_t>(&EC.category());
+    // auto addr2 = reinterpret_cast<size_t>(&errCToEC.category());
+    // auto addr3 = reinterpret_cast<size_t>(&test.category());
+    // llvm::outs() << "unable to open '" << ArchiveName << "': " 
+    // << EC.message()
+    // << "\n implicitEqualsCode " << to_string(implicitEqualsCode)
+    // << "\n implicitEqualsCat " << to_string(implicitEqualsCat)
+    // << "\n implicitEquals " << to_string(implicitEquals)
+    // << "\n cat 1 addr " << to_string(addr1)
+    // << "\n cat 2 addr " << to_string(addr2)
+    // << "\n cat 3 addr " << to_string(addr3)
+    // << "\n EC category " << to_string(EC.category().name())
+    // << "\n EC value " << to_string(EC.value())
+    // << "\n errCToEC category " << to_string(errCToEC.category().name())
+    // << "\n errCToEC value " << to_string(errCToEC.value())
+    // << "\n errc::no_such_file_or_directory " << to_string(static_cast<int>(errc::no_such_file_or_directory));
+    
+    if (EC != errc::no_such_file_or_directory) {
+      fail("unable to open '" + ArchiveName + "': " + EC.message());
+    }
+  }
 
   if (!EC) {
     Expected<std::unique_ptr<object::Archive>> ArchiveOrError =
