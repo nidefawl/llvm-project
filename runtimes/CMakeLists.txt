@@ -1,6 +1,7 @@
 # This file handles building LLVM runtime sub-projects.
 cmake_minimum_required(VERSION 3.13.4)
 project(Runtimes C CXX ASM)
+set(CMAKE_REQUIRED_FLAGS "")
 
 set(LLVM_ALL_RUNTIMES "compiler-rt;libc;libcxx;libcxxabi;libunwind;openmp")
 set(LLVM_ENABLE_RUNTIMES "" CACHE STRING

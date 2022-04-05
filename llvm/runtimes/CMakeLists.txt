@@ -86,8 +86,6 @@ function(builtin_default_target compiler_rt_path)
                                       -DLLVM_RUNTIME_OUTPUT_INTDIR=${LLVM_TOOLS_BINARY_DIR}
                                       -DLLVM_DEFAULT_TARGET_TRIPLE=${LLVM_TARGET_TRIPLE}
                                       -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=${LLVM_ENABLE_PER_TARGET_RUNTIME_DIR_default}
-                                      -DCMAKE_C_COMPILER_WORKS=ON
-                                      -DCMAKE_ASM_COMPILER_WORKS=ON
                                       ${COMMON_CMAKE_ARGS}
                                       ${BUILTINS_CMAKE_ARGS}
                            PASSTHROUGH_PREFIXES CMAKE_OSX
@@ -121,8 +119,6 @@ function(builtin_register_target compiler_rt_path target)
                                       -DLLVM_RUNTIME_OUTPUT_INTDIR=${LLVM_TOOLS_BINARY_DIR}
                                       -DLLVM_DEFAULT_TARGET_TRIPLE=${target}
                                       -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
-                                      -DCMAKE_C_COMPILER_WORKS=ON
-                                      -DCMAKE_ASM_COMPILER_WORKS=ON
                                       -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
                                       ${COMMON_CMAKE_ARGS}
                                       ${${target}_extra_args}
@@ -244,9 +240,6 @@ function(runtime_default_target)
                                       -DLLVM_ENABLE_PROJECTS_USED=${LLVM_ENABLE_PROJECTS_USED}
                                       -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=${LLVM_ENABLE_PER_TARGET_RUNTIME_DIR_default}
                                       -DLLVM_BUILD_TOOLS=${LLVM_BUILD_TOOLS}
-                                      -DCMAKE_C_COMPILER_WORKS=ON
-                                      -DCMAKE_CXX_COMPILER_WORKS=ON
-                                      -DCMAKE_ASM_COMPILER_WORKS=ON
                                       ${COMMON_CMAKE_ARGS}
                                       ${RUNTIMES_CMAKE_ARGS}
                            PASSTHROUGH_PREFIXES CMAKE_OSX
@@ -354,9 +347,6 @@ function(runtime_register_target name target)
                                       -DLLVM_DEFAULT_TARGET_TRIPLE=${target}
                                       -DLLVM_ENABLE_PROJECTS_USED=${LLVM_ENABLE_PROJECTS_USED}
                                       -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
-                                      -DCMAKE_C_COMPILER_WORKS=ON
-                                      -DCMAKE_CXX_COMPILER_WORKS=ON
-                                      -DCMAKE_ASM_COMPILER_WORKS=ON
                                       -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
                                       -DLLVM_RUNTIMES_TARGET=${name}
                                       ${COMMON_CMAKE_ARGS}
