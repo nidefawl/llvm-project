@@ -1,5 +1,6 @@
 # This file handles building LLVM runtime sub-projects.
 cmake_minimum_required(VERSION 3.20.0)
+set(CMAKE_REQUIRED_FLAGS "")
 
 # Add path for custom and the LLVM build's modules to the CMake module path.
 set(LLVM_COMMON_CMAKE_UTILS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
