@@ -1,10 +1,10 @@
 {
 	"name": "lldb-vscode",
 	"displayName": "LLDB native Debug stub",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"publisher": "llvm",
 	"repository": "llvm.org",
-	"description": "Debug adapter for LLDB which uses a C++ tool to interface directly with LLDB.",
+	"description": "Debug adapter for LLDB which uses the lldb-vscode exectuable to interface directly with LLDB.",
 	"author": {
 		"name": "Greg Clayton",
 		"email": "clayborg@gmail.com"
@@ -14,116 +14,89 @@
 		"multi-root ready"
 	],
 	"engines": {
-		"vscode": "^1.18.0",
-		"node": "^7.9.0"
+		"vscode": "^1.63.0"
 	},
 	"categories": [
 		"Debuggers"
 	],
 	"private": true,
+  "scripts": {
+     "build": "vsce package"
+  },
 	"devDependencies": {
-		"@types/node": "7.0.43",
-		"@types/mocha": "2.2.45",
-		"typescript": "2.6.2",
-		"mocha": "4.0.1",
-		"vscode": "1.1.10",
-		"vscode-debugadapter-testsupport": "1.25.0",
-		"tslint": "5.8.0",
-		"vsce": "^1.36.3"
+		"vsce": "^2.7.0"
 	},
 	"contributes": {
 		"languages": [
 			{
-                "id": "lldb.disassembly",
-                "aliases": [
-                "Disassembly"
-                ],
-                "extensions": [
-                ".disasm"
-                ]
+				"id": "lldb.disassembly",
+				"aliases": [
+					"Disassembly"
+				],
+				"extensions": [
+					".disasm"
+				]
 			}
 		],
 		"grammars": [
 			{
-                "language": "lldb.disassembly",
-                "scopeName": "source.disassembly",
-                "path": "./syntaxes/disassembly.json"
-            }
-        ],
-        "breakpoints": [
-          {
-            "language": "ada"
-          },
-          {
-            "language": "arm"
-          },
-          {
-            "language": "asm"
-          },
-          {
-            "language": "c"
-          },
-          {
-            "language": "cpp"
-          },
-          {
-            "language": "crystal"
-          },
-          {
-            "language": "d"
-          },
-          {
-            "language": "fortan"
-          },
-          {
-            "language": "fortran-modern"
-          },
-          {
-            "language": "nim"
-          },
-          {
-            "language": "objective-c"
-          },
-          {
-            "language": "objectpascal"
-          },
-          {
-            "language": "pascal"
-          },
-          {
-            "language": "rust"
-          },
-          {
-            "language": "swift"
-          }
-        ],
+				"language": "lldb.disassembly",
+				"scopeName": "source.disassembly",
+				"path": "./syntaxes/disassembly.json"
+			}
+		],
+		"breakpoints": [
+			{
+				"language": "ada"
+			},
+			{
+				"language": "arm"
+			},
+			{
+				"language": "asm"
+			},
+			{
+				"language": "c"
+			},
+			{
+				"language": "cpp"
+			},
+			{
+				"language": "crystal"
+			},
+			{
+				"language": "d"
+			},
+			{
+				"language": "fortan"
+			},
+			{
+				"language": "fortran-modern"
+			},
+			{
+				"language": "nim"
+			},
+			{
+				"language": "objective-c"
+			},
+			{
+				"language": "objectpascal"
+			},
+			{
+				"language": "pascal"
+			},
+			{
+				"language": "rust"
+			},
+			{
+				"language": "swift"
+			}
+		],
 		"debuggers": [
 			{
 				"type": "lldb-vscode",
 				"label": "Native LLDB Debugger",
-				"enableBreakpointsFor": {
-					"languageIds": [
-						"ada",
-						"arm",
-						"asm",
-						"c",
-						"cpp",
-						"crystal",
-						"d",
-						"fortan",
-						"fortran-modern",
-						"nim",
-						"objective-c",
-						"objectpascal",
-						"pascal",
-						"rust",
-						"swift"
-					]
-				},
-				"program": "./bin/lldb-vscode",
-				"windows": {
-					"program": "./bin/lldb-vscode.exe"
-				},
+				"runtime": "lldb-vscode",
 				"configurationAttributes": {
 					"launch": {
 						"required": [
