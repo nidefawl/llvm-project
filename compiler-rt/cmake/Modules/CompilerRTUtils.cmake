@@ -307,6 +307,10 @@ macro(load_llvm_config)
                      "Reconfigure with -DLLVM_CMAKE_DIR=/path/to/llvm.")
   else()
     list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR}")
+
+    if (DEFINED LLVM_BINARY_DIR AND NOT LLVM_BINARY_DIR STREQUAL BINARY_DIR) 
+      message(FATAL_ERROR "Attempt to change LLVM_BINARY_DIR from ${LLVM_BINARY_DIR} to ${LLVM_BINARY_DIR}. Are you using the right llvm-config? (${LLVM_CONFIG_PATH})")
+    endif()
     # Turn into CACHE PATHs for overwritting
     set(LLVM_BINARY_DIR "${LLVM_BINARY_DIR}" CACHE PATH "Path to LLVM build tree")
     set(LLVM_LIBRARY_DIR "${LLVM_LIBRARY_DIR}" CACHE PATH "Path to llvm/lib")
