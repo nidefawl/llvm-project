@@ -3934,7 +3934,18 @@ enum CXErrorCode clang_parseTranslationUnit2(
     unsigned options, CXTranslationUnit *out_TU) {
   noteBottomOfStack();
   SmallVector<const char *, 4> Args;
-  Args.push_back("clang");
+  const char* FirstArgument = nullptr;
+  if (num_command_line_args) {
+    FirstArgument = command_line_args[0];
+  }
+  SmallString<128> ExecutablePath("clang");
+  if (!FirstArgument || !llvm::sys::fs::exists(FirstArgument)) {
+    if (llvm::ErrorOr<std::string> P =
+          llvm::sys::findProgramByName(ExecutablePath)) {
+        ExecutablePath = *P;
+    }
+    Args.push_back(ExecutablePath.c_str());
+  }
   Args.append(command_line_args, command_line_args + num_command_line_args);
   return clang_parseTranslationUnit2FullArgv(
       CIdx, source_filename, Args.data(), Args.size(), unsaved_files,
