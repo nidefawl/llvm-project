@@ -2045,6 +2045,15 @@ void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
   config->stdcallFixup =
       args.hasFlag(OPT_stdcall_fixup, OPT_stdcall_fixup_no, config->mingw);
   config->warnStdcallFixup = !args.hasArg(OPT_stdcall_fixup);
+
+  if (args.hasArg(OPT_dllrename)) {
+    for (const StringRef value : args.getAllArgValues(OPT_dllrename)) {
+      const std::pair<StringRef, StringRef> dllnamePath = value.split("=");
+      const StringRef dllName = dllnamePath.first;
+      const std::string path = dllnamePath.second.str();
+      config->dllImportRename[dllName] = path;
+    }
+  }
   config->allowDuplicateWeak =
       args.hasFlag(OPT_lld_allow_duplicate_weak,
                    OPT_lld_allow_duplicate_weak_no, config->mingw);

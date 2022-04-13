@@ -272,6 +272,9 @@ struct Configuration {
       callGraphProfile;
   bool callGraphProfileSort = false;
 
+  // Used for /dllrename:
+  llvm::StringMap<std::string> dllImportRename;
+
   // Used for /print-symbol-order:
   StringRef printSymbolOrder;
 
