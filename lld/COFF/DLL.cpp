@@ -20,8 +20,10 @@
 #include "DLL.h"
 #include "COFFLinkerContext.h"
 #include "Chunks.h"
+#include "Config.h"
 #include "SymbolTable.h"
 #include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/Object/COFF.h"
 #include "llvm/Support/Endian.h"
 #include "llvm/Support/Path.h"
@@ -604,8 +606,14 @@ void IdataContents::create() {
     for (int i = 0, e = syms.size(); i < e; ++i)
       syms[i]->setLocation(addresses[base + i]);
 
+    // Remap the dll name
+    auto dllName = syms[0]->getDLLName();
+    auto dllMapping = config->dllImportRename.find(dllName);
+    if (dllMapping != config->dllImportRename.end())
+      dllName = dllMapping->second;
+
     // Create the import table header.
-    dllNames.push_back(make<StringChunk>(syms[0]->getDLLName()));
+    dllNames.push_back(make<StringChunk>(dllName));
     auto *dir = make<ImportDirectoryChunk>(dllNames.back());
     dir->lookupTab = lookups[base];
     dir->addressTab = addresses[base];
@@ -641,8 +649,15 @@ void DelayLoadContents::create(COFFLinkerContext &ctx, Defined *h) {
 
   // Create .didat contents for each DLL.
   for (std::vector<DefinedImportData *> &syms : v) {
+
+    // Remap the dll name
+    auto dllName = syms[0]->getDLLName();
+    auto dllMapping = config->dllImportRename.find(dllName);
+    if (dllMapping != config->dllImportRename.end())
+      dllName = dllMapping->second;
+
     // Create the delay import table header.
-    dllNames.push_back(make<StringChunk>(syms[0]->getDLLName()));
+    dllNames.push_back(make<StringChunk>(dllName));
     auto *dir = make<DelayDirectoryChunk>(dllNames.back());
 
     size_t base = addresses.size();

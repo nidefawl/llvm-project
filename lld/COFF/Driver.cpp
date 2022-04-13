@@ -1914,6 +1914,15 @@ void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
       args.hasFlag(OPT_stdcall_fixup, OPT_stdcall_fixup_no, config->mingw);
   config->warnStdcallFixup = !args.hasArg(OPT_stdcall_fixup);
 
+  if (args.hasArg(OPT_dllrename)) {
+    for (const StringRef value : args.getAllArgValues(OPT_dllrename)) {
+      const std::pair<StringRef, StringRef> dllnamePath = value.split("=");
+      const StringRef dllName = dllnamePath.first;
+      const std::string path = dllnamePath.second.str();
+      config->dllImportRename[dllName] = path;
+    }
+  }
+
   // Don't warn about long section names, such as .debug_info, for mingw or
   // when -debug:dwarf is requested.
   if (config->mingw || config->debugDwarf)
