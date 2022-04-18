@@ -103,6 +103,11 @@ static void printHelp(const char *argv0) {
       false /*ShowHidden*/, true /*ShowAllAliases*/);
   lld::outs() << "\n";
 }
+namespace lld {
+namespace coff {
+void printHelp(const char *argv0);
+} // namespace coff
+} // namespace lld
 
 static cl::TokenizerCallback getQuotingStyle() {
   if (Triple(sys::getProcessTriple()).getOS() == Triple::Win32)
@@ -190,6 +195,8 @@ bool link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
 
   if (args.hasArg(OPT_help)) {
     printHelp(argsArr[0]);
+    // Also print lld-link help
+    coff::printHelp(argsArr[0]);
     return true;
   }
 
@@ -372,7 +379,7 @@ bool link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
   if (args.hasFlag(OPT_no_insert_timestamp, OPT_insert_timestamp, false))
     add("-timestamp:0");
 
-  if (args.hasFlag(OPT_gc_sections, OPT_no_gc_sections, false))
+  if (args.hasFlag(OPT_gc_sections, OPT_no_gc_sections, true))
     add("-opt:ref");
   else
     add("-opt:noref");
