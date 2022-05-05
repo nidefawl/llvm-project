@@ -50,6 +50,7 @@ install(TARGETS libgcc_s
         ARCHIVE DESTINATION "${LLVM_LIBGCC_LIBUNWIND_STATIC_ROOT}" COMPONENT unwind
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT unwind)
 
+construct_compiler_rt_default_triple()
 get_compiler_rt_install_dir(${LLVM_LIBGCC_TARGET_ARCH} install_dir_builtins)
 string(REGEX REPLACE "^lib/" "" install_dir_builtins "${install_dir_builtins}")
 string(FIND "${install_dir_builtins}" "clang" install_path_contains_triple)
