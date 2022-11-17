@@ -64,7 +64,8 @@ ENV PATH=/build/llvm/llvm-linux-x86_64/bin:$PATH
 
 # steal the local runtimes and provide them for packaging, what is the worst that could happen?
 # in theory this should work
-RUN cp /lib/x86_64-linux-gnu/libc++abi.so.1 /build/llvm/llvm-linux-x86_64/lib
-RUN cp /lib/x86_64-linux-gnu/libc++.so.1 /build/llvm/llvm-linux-x86_64/lib
-RUN cp /lib/x86_64-linux-gnu/libunwind.so.1 /build/llvm/llvm-linux-x86_64/lib
-RUN tar -cvjSf toolchain.bz2 --transform "s%^llvm-linux-x86_64%llvm-clang-ubuntu-22.04-x86_64%" llvm-linux-x86_64
+RUN cp /lib/x86_64-linux-gnu/libc++abi.so.1 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libc++.so.1 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libunwind.so.1 /build/llvm/llvm-linux-x86_64/lib
+
+RUN tar -cjSf toolchain.bz2 --transform "s%^llvm-linux-x86_64%llvm-clang-ubuntu-22.04-x86_64%" llvm-linux-x86_64
