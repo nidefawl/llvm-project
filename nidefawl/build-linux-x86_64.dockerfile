@@ -69,3 +69,8 @@ RUN cp /lib/x86_64-linux-gnu/libc++abi.so.1 /build/llvm/llvm-linux-x86_64/lib &&
     cp /lib/x86_64-linux-gnu/libunwind.so.1 /build/llvm/llvm-linux-x86_64/lib
 
 RUN tar -cjSf toolchain.bz2 --transform "s%^llvm-linux-x86_64%llvm-clang-ubuntu-22.04-x86_64%" llvm-linux-x86_64
+
+RUN cp /lib/x86_64-linux-gnu/libncurses.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libform.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libtinfo.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libpanel.so.6 /build/llvm/llvm-linux-x86_64/lib
