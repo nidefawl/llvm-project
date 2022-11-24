@@ -86,6 +86,40 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && rm -Rf "${BUILDDIR_TOOLCHAIN}/runti
 
 $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && cmake -Wno-dev --warn-uninitialized \
     -S$LLVM_SRC_PATH/runtimes \
+    -B${BUILDDIR_TOOLCHAIN}/runtimes-memsan \
+    -GNinja \
+    -DCMAKE_BUILD_TYPE=Debug \
+	  -DLLVM_USE_SANITIZER=MemoryWithOrigins \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+    -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}/runtimes-memsan" \
+    -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-unknown-linux-gnu" \
+    -DLLVM_HOST_TRIPLE="x86_64-unknown-linux-gnu" \
+    -DCMAKE_C_COMPILER_TARGET="x86_64-unknown-linux-gnu" \
+    -DCMAKE_CXX_COMPILER_TARGET="x86_64-unknown-linux-gnu" \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+    -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxxabi;libcxx" \
+    -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+    -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+    -DLLVM_ENABLE_LIBCXX=ON \
+    -DLIBCXX_ABI_UNSTABLE=ON \
+    -DLIBCXX_ENABLE_SHARED=ON \
+    -DLIBCXX_ENABLE_STATIC=ON \
+    -DLIBCXX_USE_COMPILER_RT=ON \
+    -DLIBCXX_CXX_ABI=libcxxabi \
+    -DLIBCXX_INCLUDE_TESTS=OFF \
+    -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
+    -DLIBCXXABI_INCLUDE_TESTS=OFF \
+    -DLIBCXXABI_USE_COMPILER_RT=ON \
+    -DSANITIZER_CXX_ABI=libcxxabi \
+    -DLLVM_ENABLE_ASSERTIONS=OFF \
+    -DLLVM_INCLUDE_DOCS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    $EXTRA_ARGS
+
+$BUILD_RUNTIMES && cmake --build "${BUILDDIR_TOOLCHAIN}/runtimes-memsan" --target install
+
+$RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && cmake -Wno-dev --warn-uninitialized \
+    -S$LLVM_SRC_PATH/runtimes \
     -B${BUILDDIR_TOOLCHAIN}/runtimes \
     -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
