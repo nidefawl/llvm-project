@@ -52,7 +52,7 @@ RUN sudo mkdir -p /build && sudo chown -R builder:builder /build && \
 
 WORKDIR /build/llvm
 ARG GIT_REPO=https://github.com/nidefawl/llvm-project.git
-ARG GIT_BRANCH=llvm-dev
+ARG GIT_BRANCH=bsect
 RUN git clone --depth=1 --branch=$GIT_BRANCH --single-branch $GIT_REPO llvm-project
 
 COPY build-linux-x86_64.sh .
