@@ -202,6 +202,10 @@ if [ $BUILD_LLVM ] && [ -d "lib/clang/$CLANG_VERSION/include" ]; then
   rsync -va lib/clang/$CLANG_VERSION/include/ include/
   rm -Rf lib/clang
 fi
+if [ $BUILD_LLVM ] && [ -d "lib/clang/$CLANG_MAJOR/include" ]; then
+  rsync -va lib/clang/$CLANG_MAJOR/include/ include/
+  rm -Rf lib/clang
+fi
 
 # Now use the newly built libs for the compiler itself. 
 # They are ABI compatible if this is a stage 2 build
