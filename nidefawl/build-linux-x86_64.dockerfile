@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -yqq
-RUN apt-get install -qqy --no-install-recommends sudo wget gnupg2 ca-certificates.
+RUN apt-get install -qqy --no-install-recommends sudo wget gnupg2 ca-certificates
 # add user builder
 RUN useradd -ms /bin/bash builder
 # add user builder to sudoers
@@ -13,31 +13,34 @@ USER builder
 ENV PATH=/opt/cmake/bin:$PATH:/home/builder/.local/bin
 WORKDIR /home/builder
 
-RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-RUN sudo bash -c "echo 'deb https://apt.llvm.org/jammy/ llvm-toolchain-jammy main' >> /etc/apt/sources.list"
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+RUN cat /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+RUN sudo bash -c "echo 'deb https://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main' >> /etc/apt/sources.list"
+RUN cat /etc/apt/sources.list
 RUN sudo apt-get update -yqq
+RUN apt search clang
 RUN sudo apt-get install -qqy --no-install-recommends \
-    autoconf-archive autopoint build-essential automake bzip2 clang-16 python3  \
-    clang-tidy-16 curl e2fslibs-dev file gettext git gnupg2 less libasound2-dev \
-    libatomic1 libattr1-dev libbsd-dev libbsd0 libc++-16-dev libc++abi-16-dev   \
+    autoconf-archive autopoint build-essential automake bzip2 clang-18 python3  \
+    clang-tidy-18 curl e2fslibs-dev file gettext git gnupg2 less libasound2-dev \
+    libatomic1 libattr1-dev libbsd-dev libbsd0 libc++-18-dev libc++abi-18-dev   \
     libedit-dev libgtk-3-dev liblzma-dev libncurses-dev libncursesw6 libssl-dev \
-    libtinfo6 libtool libunwind-16-dev libx11-dev libxcursor-dev libxi-dev nano \
-    libxinerama-dev libxml2 libxrandr-dev libltdl-dev lld-16 nsis pkg-config    \
+    libtinfo6 libtool libunwind-18-dev libx11-dev libxcursor-dev libxi-dev nano \
+    libxinerama-dev libxml2 libxrandr-dev libltdl-dev lld-18 nsis pkg-config    \
     python3-dev python3-distutils python3-pip swig unzip unzip yasm wget zip    \
     rsync
 
 RUN pip3 install pygments pyyaml
 
-# enfore lld-16 as linker
-RUN sudo ln -s /usr/bin/lld-16 /usr/local/bin/ld
+# enfore lld-18 as linker
+RUN sudo ln -s /usr/bin/lld-18 /usr/local/bin/ld
 
-RUN wget -nv https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+RUN wget -nv https://github.com/ninja-build/ninja/releases/download/v1.12.0/ninja-linux.zip
 RUN sudo unzip ninja-linux.zip -d /usr/local/bin/ && rm ninja-linux.zip
 
 # Manually install a newer version of CMake; this is needed since building
 # LLVM requires CMake 3.13.4, while Ubuntu 18.04 ships with 3.10.2. If
 # updating to a newer distribution, this can be dropped.
-RUN wget -nv https://github.com/Kitware/CMake/releases/download/v3.25.0-rc4/cmake-3.25.0-rc4-linux-$(uname -m).tar.gz
+RUN wget -nv https://github.com/Kitware/CMake/releases/download/v3.29.3/cmake-3.29.3-linux-$(uname -m).tar.gz
 RUN tar -zxf cmake-*.tar.gz && rm cmake-*.tar.gz
 RUN sudo mv cmake-* /opt/cmake && sudo chown -R root:root /opt/cmake
 
