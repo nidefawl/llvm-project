@@ -26,11 +26,11 @@ if [ ! -z "$BOOT_TC" ]; then
   export PATH=$BOOT_TC/bin:$PATH
   export LD_LIBRARY_PATH=$BOOT_TC/lib/x86_64-unknown-linux-gnu
 else
-  export CC="clang-16"
-  export CXX="clang++-16"
+  export CC="clang-18"
+  export CXX="clang++-18"
   # use lld if found
   /usr/bin/which "ld.lld" &> /dev/null && {
-    EXTRA_ARGS+="-DLLVM_USE_LINKER=lld-16 "
+    EXTRA_ARGS+="-DLLVM_USE_LINKER=lld-18 "
     EXTRA_ARGS+="-DLLVM_ENABLE_LTO=thin "
   }
 fi
@@ -59,9 +59,9 @@ printf "#include <cstddef>\nint main(){return sizeof(size_t);}" \
   exit 1
 }
 
-CLANG_MAJOR=$(sed -n 's/\s*set(LLVM_VERSION_MAJOR \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/llvm/CMakeLists.txt)
-CLANG_MINOR=$(sed -n 's/\s*set(LLVM_VERSION_MINOR \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/llvm/CMakeLists.txt)
-CLANG_PATCH=$(sed -n 's/\s*set(LLVM_VERSION_PATCH \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/llvm/CMakeLists.txt)
+CLANG_MAJOR=$(sed -n 's/\s*set(LLVM_VERSION_MAJOR \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/cmake/Modules/LLVMVersion.cmake)
+CLANG_MINOR=$(sed -n 's/\s*set(LLVM_VERSION_MINOR \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/cmake/Modules/LLVMVersion.cmake)
+CLANG_PATCH=$(sed -n 's/\s*set(LLVM_VERSION_PATCH \([0-9]\+\))/\1/p' $LLVM_SRC_PATH/cmake/Modules/LLVMVersion.cmake)
 CLANG_VERSION="$CLANG_MAJOR.$CLANG_MINOR.$CLANG_PATCH"
 echo "Building CLANG_VERSION $CLANG_VERSION"
 echo "Building CC $CC"
@@ -79,7 +79,7 @@ set -x
 
 RUN_CMAKE_CONFIG_STEP=true
 BUILD_RUNTIMES=true
-BUILD_LLVM=true 
+BUILD_LLVM=true
 
 # rerunning cmake configure on existing build doesn't work too well
 $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && rm -Rf "${BUILDDIR_TOOLCHAIN}/runtimes"
@@ -89,7 +89,7 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && cmake -Wno-dev --warn-uninitialized
     -B${BUILDDIR_TOOLCHAIN}/runtimes-memsan \
     -GNinja \
     -DCMAKE_BUILD_TYPE=Debug \
-	  -DLLVM_USE_SANITIZER=MemoryWithOrigins \
+    -DLLVM_USE_SANITIZER=MemoryWithOrigins \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}/runtimes-memsan" \
     -DLLVM_DEFAULT_TARGET_TRIPLE="x86_64-unknown-linux-gnu" \
@@ -100,6 +100,9 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && cmake -Wno-dev --warn-uninitialized
     -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxxabi;libcxx" \
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
     -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=OFF \
+    -DCOMPILER_RT_BUILD_BUILTINS=ON \
+    -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
     -DLLVM_ENABLE_LIBCXX=ON \
     -DLIBCXX_ABI_UNSTABLE=ON \
     -DLIBCXX_ENABLE_SHARED=ON \
@@ -143,6 +146,9 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_RUNTIMES && cmake -Wno-dev --warn-uninitialized
     -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
     -DLIBCXXABI_INCLUDE_TESTS=OFF \
     -DLIBCXXABI_USE_COMPILER_RT=ON \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=OFF \
+    -DCOMPILER_RT_BUILD_BUILTINS=ON \
+    -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
     -DSANITIZER_CXX_ABI=libcxxabi \
     -DLLVM_ENABLE_ASSERTIONS=OFF \
     -DLLVM_INCLUDE_DOCS=OFF \
@@ -167,7 +173,7 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_LLVM && cmake -Wno-dev --warn-uninitialized \
     -DLLVM_HOST_TRIPLE="x86_64-unknown-linux-gnu" \
     -DCMAKE_C_COMPILER_TARGET="x86_64-unknown-linux-gnu" \
     -DCMAKE_CXX_COMPILER_TARGET="x86_64-unknown-linux-gnu" \
-    -DCLANG_RESOURCE_DIR="../" \
+    -DCLANG_RESOURCE_DIR="" \
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
     -DLLVM_ENABLE_PROJECTS="clang;lld;lldb;clang-tools-extra" \
     -DLLVM_INSTALL_TOOLCHAIN_ONLY=OFF \
@@ -195,24 +201,28 @@ $RUN_CMAKE_CONFIG_STEP && $BUILD_LLVM && cmake -Wno-dev --warn-uninitialized \
 $BUILD_LLVM && cmake --build "${BUILDDIR_TOOLCHAIN}/toolchain" --parallel 6 --target llvm-tblgen
 $BUILD_LLVM && cmake --build "${BUILDDIR_TOOLCHAIN}/toolchain" --parallel 9 --target install/strip
 
-cd $INSTALL_PREFIX
-# There is no way to configure the install directory for these headers
-# so we move them manully
-if [ $BUILD_LLVM ] && [ -d "lib/clang/$CLANG_VERSION/include" ]; then
-  rsync -va lib/clang/$CLANG_VERSION/include/ include/
-  rm -Rf lib/clang
-fi
-if [ $BUILD_LLVM ] && [ -d "lib/clang/$CLANG_MAJOR/include" ]; then
-  rsync -va lib/clang/$CLANG_MAJOR/include/ include/
-  rm -Rf lib/clang
+# the install prefix for the compiler-rt builtin .a files is not correct
+# fix it manually for now
+if [ -d "${INSTALL_PREFIX}/lib/clang/19" ]; then
+  pushd "${INSTALL_PREFIX}/lib/clang/19"
+  if [ ! -d lib ]; then
+    mkdir lib
+    pushd lib
+    ln -s ../../../x86_64-unknown-linux-gnu
+    popd
+  fi
+  popd
 fi
 
-# Now use the newly built libs for the compiler itself. 
-# They are ABI compatible if this is a stage 2 build
-# cd lib
-# # rm libc++*
-# # rm libunwind*
-# rsync -va $BOOT_TC/lib/x86_64-unknown-linux-gnu/libc++.so.2 .
-# rsync -va $BOOT_TC/lib/x86_64-unknown-linux-gnu/libc++abi.so.1
-# cd ..
-# cd ..
+# steal the local runtimes and provide them for packaging, what is the worst that could happen?
+# in theory this should work
+cp /lib/x86_64-linux-gnu/libc++abi.so.1 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libc++.so.1 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libunwind.so.1 /build/llvm/llvm-linux-x86_64/lib
+
+cp /lib/x86_64-linux-gnu/libncurses.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libform.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libtinfo.so.6 /build/llvm/llvm-linux-x86_64/lib && \
+    cp /lib/x86_64-linux-gnu/libpanel.so.6 /build/llvm/llvm-linux-x86_64/lib
+
+tar -cjSf toolchain.bz2 --transform "s%^llvm-linux-x86_64%llvm-clang-${CLANG_VERSION}-ubuntu-22.04-x86_64%" llvm-linux-x86_64

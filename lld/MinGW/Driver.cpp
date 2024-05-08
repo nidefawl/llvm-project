@@ -103,11 +103,6 @@ static void printHelp(const char *argv0) {
       false /*ShowHidden*/, true /*ShowAllAliases*/);
   lld::outs() << "\n";
 }
-namespace lld {
-namespace coff {
-void printHelp(const char *argv0);
-} // namespace coff
-} // namespace lld
 
 static cl::TokenizerCallback getQuotingStyle() {
   if (Triple(sys::getProcessTriple()).getOS() == Triple::Win32)
@@ -195,8 +190,6 @@ bool link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
 
   if (args.hasArg(OPT_help)) {
     printHelp(argsArr[0]);
-    // Also print lld-link help
-    coff::printHelp(argsArr[0]);
     return true;
   }
 

@@ -705,8 +705,8 @@ void IdataContents::create(COFFLinkerContext &ctx) {
 
     // Remap the dll name
     auto dllName = syms[0]->getDLLName();
-    auto dllMapping = config->dllImportRename.find(dllName);
-    if (dllMapping != config->dllImportRename.end())
+    auto dllMapping = ctx.config.dllImportRename.find(dllName);
+    if (dllMapping != ctx.config.dllImportRename.end())
       dllName = dllMapping->second;
 
     // Create the import table header.
@@ -751,8 +751,8 @@ void DelayLoadContents::create(Defined *h) {
 
     // Remap the dll name
     auto dllName = syms[0]->getDLLName();
-    auto dllMapping = config->dllImportRename.find(dllName);
-    if (dllMapping != config->dllImportRename.end())
+    auto dllMapping = ctx.config.dllImportRename.find(dllName);
+    if (dllMapping != ctx.config.dllImportRename.end())
       dllName = dllMapping->second;
 
     // Create the delay import table header.

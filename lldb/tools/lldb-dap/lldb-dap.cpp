@@ -1360,7 +1360,6 @@ void request_evaluate(const llvm::json::Object &request) {
     if (frame.IsValid()) {
       g_dap.focus_tid = frame.GetThread().GetThreadID();
     }
-  if (!expression.empty() && (expression[0] == '`' || expression[0] == '/')) {
     auto result =
         RunLLDBCommandsVerbatim(llvm::StringRef(), {std::string(expression)});
     EmplaceSafeString(body, "result", result);
